@@ -1,6 +1,7 @@
 const express=require('express');
 const router=express.Router();
-
+const simulateFactorial=require('../utils/factorial');
+const simulateFibonacci=require('../utils/fibonacci');
 router.post('/',async(req,res)=>{
     try{
         const {function:funcName,input}=req.body;
@@ -8,18 +9,11 @@ router.post('/',async(req,res)=>{
             return res.status(400).json({error:"Invalid input"});
         }
         if(funcName==="factorial"){
-            const steps=[];
-            function factorial(n){
-            steps.push({type:"call","function":"factorial",value:n});
-            if(n===1){
-                steps.push({type:"return",value:1,result:1});
-                return 1;
-            }
-            const result=n*factorial(n-1);
-            steps.push({type:"return",value:n,result:result});
-            return result;
-            }
-            factorial(input);
+            const steps=simulateFactorial(input);
+            return res.json(steps);
+        }
+        else if(funcName=="fibonacci"){
+            const steps=simulateFibonacci(input);
             return res.json(steps);
         }
         return res.status(400).json({error:"Function not supported"});

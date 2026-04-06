@@ -5,6 +5,7 @@ function App(){
     const [steps,setSteps]=useState([]);
     const [stack,setStack]=useState([]);
     const [currentStep,setCurrentStep]=useState(0);
+    const [funcName,setFuncName]=useState("factorial");
     async function handleSimulate(){
         const res=await fetch("http://localhost:5000/api/simulate",{
             method:"POST",
@@ -12,7 +13,7 @@ function App(){
                 "Content-Type":"application/json",
             },
             body:JSON.stringify({
-                function:"factorial",
+                function:funcName,
                 input:Number(input),
             }),
         });
@@ -48,6 +49,10 @@ function App(){
     return(
         <div>
             <h1>Recursion Visualizer</h1>
+            <select value={funcName} onChange={(e) => setFuncName(e.target.value)}>
+            <option value="factorial">Factorial</option>
+            <option value="fibonacci">Fibonacci</option>
+            </select>
             <input type="number"
             value={input}
             onChange={(e)=>setInput(e.target.value)}/>
@@ -66,7 +71,7 @@ function App(){
                     backgroundColor: "#f0f0f0",
                     }}
                 >
-                    <div>factorial({item.value})</div>
+                    <div>{funcName}({item.value})</div>
                     <div>result: {item.result ?? "?"}</div>
                 </div>
                 ))}
