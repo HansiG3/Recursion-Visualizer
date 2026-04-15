@@ -22,7 +22,7 @@ function simulateFibonacci(n){
         steps.push({
             type:"return",
             function:"fibonacci",
-            value:"x",
+            value:x,
             result:result
         });
         return result;
