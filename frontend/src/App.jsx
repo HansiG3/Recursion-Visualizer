@@ -1,31 +1,110 @@
 import { useState } from "react";   
 import {useEffect } from "react";
-function TreeNode({node,funcName}){
-    const isActive=node.result===null;
-    let bgColor='#90caf9';
-    if(node.result!==null)bgColor='#a5d6a7';
-    if(isActive) bgColor='#ffe082';
-    return (
-    <div style={{ textAlign: "center", margin: "10px" }}>
+function TreeNode({ node, funcName }) {
+  const isActive = node.result === null;
+
+  let bgColor = "#e3f2fd";
+  if (node.result !== null) bgColor = "#c8e6c9";
+  if (isActive) bgColor = "#ffe082";
+
+  return (
+    <div style={{ textAlign: "center", marginTop: "20px" }}>
+
+      {/* BOX */}
       <div
         style={{
           border: "2px solid black",
-          padding: "10px",
-          background: bgColor,
-          minWidth: "80px"
+          padding: "12px 16px",
+          borderRadius: "14px",
+          backgroundColor: bgColor,
+          display: "inline-block",
+          minWidth: "140px",
+          fontWeight: "bold",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
         }}
       >
-        <b>{funcName}({node.value})</b>
-        <br />
-        {node.result !== null ? `= ${node.result}` : "?"}
+        {funcName}({node.value})
+        <div style={{ marginTop: "6px" }}>
+          {node.result !== null ? `= ${node.result}` : "..."}
+        </div>
       </div>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-        {node.children.map((child) => (
-          <TreeNode key={child.id} node={child} funcName={funcName}/>
-        ))}
-      </div>
-      </div>
-    );
+
+      {/* CHILDREN */}
+      {node.children.length > 0 && (
+        <>
+          {/* ARROWS */}
+          <svg width="220" height="55">
+            <defs>
+              <marker
+                id="arrowhead"
+                markerWidth="8"
+                markerHeight="8"
+                refX="7"
+                refY="3"
+                orient="auto"
+              >
+                <path d="M0,0 L0,6 L8,3 z" fill="#555" />
+              </marker>
+            </defs>
+
+            {/* trunk */}
+            <line
+              x1="110"
+              y1="0"
+              x2="110"
+              y2="18"
+              stroke="#555"
+              strokeWidth="2"
+            />
+
+            {/* left branch */}
+            {node.children[0] && (
+              <line
+                x1="110"
+                y1="18"
+                x2="55"
+                y2="48"
+                stroke="#555"
+                strokeWidth="2"
+                markerEnd="url(#arrowhead)"
+              />
+            )}
+
+            {/* right branch */}
+            {node.children[1] && (
+              <line
+                x1="110"
+                y1="18"
+                x2="165"
+                y2="48"
+                stroke="#555"
+                strokeWidth="2"
+                markerEnd="url(#arrowhead)"
+              />
+            )}
+          </svg>
+
+          {/* CHILD BOXES */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "20px",
+              marginTop: "-5px"
+            }}
+          >
+            {node.children.map((child) => (
+              <TreeNode
+                key={child.id}
+                node={child}
+                funcName={funcName}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 function App(){
     const [input,setInput]=useState("");
@@ -82,6 +161,7 @@ function App(){
         if(currentStep>=steps.length)return;
         const timer=setTimeout(()=>{
             const step=steps[currentStep];
+            if(!step)return;
             if(step.type==="call"){
                 setCurrentAction(`Calling ${funcName}(${step.value})`);
                 setNodes(prev=>[...prev,{
@@ -108,7 +188,7 @@ function App(){
         return ()=>clearTimeout(timer);
     },[currentStep,steps,funcName,speed]);
     return(
-        <div style={{padding:"20px"}}>
+        <div style={{padding:"20px",fontFamily:"Arial"}}>
             <h1>Recursion Visualizer</h1>
             <textarea
             rows="5"
@@ -125,7 +205,12 @@ function App(){
             placeholder="Enter input"
             value={input}
             onChange={(e)=>setInput(e.target.value)}/>
-            <button onClick={handleSimulate} style={{marginLeft:"10px"}}>
+            <button onClick={handleSimulate} style={{
+                marginLeft:"10px",
+                padding:"8px 15px",
+                cursor:"pointer"
+                }}
+            >
                 Simulate
             </button>
             <div style={{ marginTop: "20px" }}>
@@ -141,8 +226,16 @@ function App(){
                 />
                 <span> {speed} ms</span>
                 </div>
-                <h3>{currentAction}</h3>
-                <div style={{marginTop:"20px"}}>
+                <h3 style={{marginTop:"20px"}}>{currentAction}</h3>
+                <div style={{
+                    marginTop:"20px",
+                    overflowX:"auto",
+                    padding:"20px",
+                    borderRadius:"12px",
+                    backgroundColor:"#f8f9fa",
+                    border:"1px solid #ddd"
+                    }}
+                >
                     {buildTree(nodes).map((root)=>(
                         <TreeNode key={root.id} node={root} funcName={funcName}/>
                     ))}
