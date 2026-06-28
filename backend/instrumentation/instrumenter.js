@@ -6,12 +6,15 @@ parser.setLanguage(CPP);
 
 function instrument(code) {
 
-    // Parse the user's code
+    // -----------------------------
+    // Parse Code
+    // -----------------------------
     const tree = parser.parse(code);
-
     const root = tree.rootNode;
 
-    // Find the first function definition
+    // -----------------------------
+    // Find Function Definition
+    // -----------------------------
     const functionNode = root.namedChildren.find(
         node => node.type === "function_definition"
     );
@@ -20,42 +23,64 @@ function instrument(code) {
         throw new Error("No function definition found.");
     }
 
-    // Extract return type
+    // -----------------------------
+    // Extract Function Details
+    // -----------------------------
     const returnType = functionNode.childForFieldName("type");
 
-    // Extract declarator
     const declarator = functionNode.childForFieldName("declarator");
 
-    // Extract function name
     const functionNameNode = declarator.namedChildren.find(
-        child => child.type === "identifier"
+        node => node.type === "identifier"
     );
 
-    // Extract parameters
     const parameters = declarator.childForFieldName("parameters");
 
-    // Extract body
     const body = functionNode.childForFieldName("body");
 
-    // Detect recursive calls
-    let recursiveCalls = [];
+    // -----------------------------
+    // Extract Parameter Names
+    // -----------------------------
+    const parameterNames = [];
+
+    for (const parameter of parameters.namedChildren) {
+
+        const declaratorNode =
+            parameter.childForFieldName("declarator");
+
+        if (!declaratorNode) continue;
+
+        let variableName = declaratorNode.text;
+
+        variableName = variableName.replace(/[&*]/g, "");
+
+        parameterNames.push(variableName);
+    }
+
+    // -----------------------------
+    // Detect Recursive Calls
+    // -----------------------------
+    const recursiveCalls = [];
 
     function traverse(node) {
 
         if (node.type === "call_expression") {
 
-            const calledFunction = node.childForFieldName("function");
+            const calledFunction =
+                node.childForFieldName("function");
 
             if (
                 calledFunction &&
                 calledFunction.text === functionNameNode.text
             ) {
+
                 recursiveCalls.push({
                     function: calledFunction.text,
                     text: node.text,
-                    start: node.startPosition,
-                    end: node.endPosition
+                    startIndex: node.startIndex,
+                    endIndex: node.endIndex
                 });
+
             }
         }
 
@@ -66,19 +91,60 @@ function instrument(code) {
 
     traverse(body);
 
+    // -----------------------------
+    // Ensure function is recursive
+    // -----------------------------
+    if (recursiveCalls.length === 0) {
+        throw new Error("Function is not recursive.");
+    }
+
+    // -----------------------------
+    // Build traceEnter()
+    // -----------------------------
+    let traceEnterStatement;
+
+    if (parameterNames.length === 0) {
+
+        traceEnterStatement =
+            `\n    traceEnter("${functionNameNode.text}");\n`;
+
+    } else {
+
+        traceEnterStatement =
+            `\n    traceEnter("${functionNameNode.text}", ${parameterNames.join(", ")});\n`;
+
+    }
+
+    // -----------------------------
+    // Insert traceEnter()
+    // -----------------------------
+    let modifiedCode =
+        code.slice(0, body.startIndex + 1) +
+        traceEnterStatement +
+        code.slice(body.startIndex + 1);
+
+    // -----------------------------
+    // Insert trace.hpp
+    // -----------------------------
+    modifiedCode =
+`#include "trace.hpp"
+
+${modifiedCode}`;
+
+    // -----------------------------
+    // Return Result
+    // -----------------------------
     return {
 
         functionName: functionNameNode.text,
 
         returnType: returnType.text,
 
-        parameters: parameters.text,
+        parameterNames,
 
-        body: body.text,
+        recursiveCalls,
 
-        isRecursive: recursiveCalls.length > 0,
-
-        recursiveCalls
+        instrumentedCode: modifiedCode
 
     };
 
