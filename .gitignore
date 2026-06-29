@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+backend/temp/
+*.exe
+*.obj
+*.o
+*.out

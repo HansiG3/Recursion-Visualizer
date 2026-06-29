@@ -1,14 +1,14 @@
 const instrument = require("./instrumentation/instrumenter");
 
 // Test Case 1 - Factorial
-// const code = `
-// int fact(int n)
-// {
-//     if(n==0)
-//         return 1;
+const code = `
+int fact(int n)
+{
+    if(n==0)
+        return 1;
 
-//     return n*fact(n-1);
-// }
+    return n*fact(n-1);
+}
 // `;
 
 // Uncomment to test GCD
@@ -25,15 +25,15 @@ int gcd(int a, int b)
 */
 
 
-const code = `
-void dfs(int node, int parent, int depth)
-{
-    if(depth==5)
-        return;
+// const code = `
+// void dfs(int node, int parent, int depth)
+// {
+//     if(depth==5)
+//         return;
 
-    dfs(node+1, node, depth+1);
-}
-`;
+//     dfs(node+1, node, depth+1);
+// }
+// `;
 
 
 // Uncomment to test no parameter function
@@ -62,9 +62,30 @@ try {
     console.log("\n========== RECURSIVE CALLS ==========");
     console.log(result.recursiveCalls);
 
+    console.log("\n========== RETURN STATEMENTS ==========\n");
+
+    if (result.returnStatements.length === 0) {
+
+        console.log("No return statements found.");
+
+    } else {
+
+        result.returnStatements.forEach((ret, index) => {
+
+            console.log(`Return Statement ${index + 1}`);
+            console.log("Text       :", ret.text);
+            console.log("Expression :", ret.expression);
+            console.log("StartIndex :", ret.startIndex);
+            console.log("EndIndex   :", ret.endIndex);
+            console.log("-----------------------------");
+
+        });
+
+    }
     console.log("\n========== INSTRUMENTED CODE ==========\n");
 
     console.log(result.instrumentedCode);
+
 
 }
 catch(err){

@@ -123,6 +123,28 @@ function instrument(code) {
         traceEnterStatement +
         code.slice(body.startIndex + 1);
 
+    const returnStatements=[];
+    function findReturns(node){
+        if(node.type==="return_statement"){
+            returnStatements.push(node);
+        }
+        for(const child of node.namedChildren){
+            findReturns(child);
+        }
+    }
+    findReturns(body);
+    console.log("Return statements Found:");
+    for (const ret of returnStatements) {
+        console.log("--------------------");
+        console.log("Text      :", ret.text);
+        console.log("Start     :", ret.startIndex);
+        console.log("End       :", ret.endIndex);
+        const expression = ret.namedChildren[0];
+        if (expression) {
+            console.log("Expression:", expression.text);
+        }
+        console.log("--------------------");
+    }
     // -----------------------------
     // Insert trace.hpp
     // -----------------------------
@@ -143,6 +165,13 @@ ${modifiedCode}`;
         parameterNames,
 
         recursiveCalls,
+
+        returnStatements: returnStatements.map(ret => ({
+        text: ret.text,
+        expression: ret.namedChildren[0]?.text,
+        startIndex: ret.startIndex,
+        endIndex: ret.endIndex
+        })),
 
         instrumentedCode: modifiedCode
 
