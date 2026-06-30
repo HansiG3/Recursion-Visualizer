@@ -98,30 +98,6 @@ function instrument(code) {
         throw new Error("Function is not recursive.");
     }
 
-    // -----------------------------
-    // Build traceEnter()
-    // -----------------------------
-    let traceEnterStatement;
-
-    if (parameterNames.length === 0) {
-
-        traceEnterStatement =
-            `\n    traceEnter("${functionNameNode.text}");\n`;
-
-    } else {
-
-        traceEnterStatement =
-            `\n    traceEnter("${functionNameNode.text}", ${parameterNames.join(", ")});\n`;
-
-    }
-
-    // -----------------------------
-    // Insert traceEnter()
-    // -----------------------------
-    let modifiedCode =
-        code.slice(0, body.startIndex + 1) +
-        traceEnterStatement +
-        code.slice(body.startIndex + 1);
 
     const returnStatements=[];
     function findReturns(node){
@@ -148,11 +124,53 @@ function instrument(code) {
     // -----------------------------
     // Insert trace.hpp
     // -----------------------------
+    let modifiedCode =code;
+    returnStatements.sort(
+        (a,b)=>b.startIndex-a.startIndex
+    );
+    for(const ret of returnStatements){
+        const expression=ret.namedChildren[0];
+        if(!expression)continue;
+        const replacement=
+    `{
+        auto __trace_result=${expression.text};
+        traceReturn(__trace_result);
+        return __trace_result;
+    }`;
+
+        modifiedCode=
+        modifiedCode.slice(0,ret.startIndex)+
+        replacement+
+        modifiedCode.slice(ret.endIndex);
+    }
+    // -----------------------------
+    // Build traceEnter()
+    // -----------------------------
+    let traceEnterStatement;
+
+    if (parameterNames.length === 0) {
+
+        traceEnterStatement =
+            `\n    traceEnter("${functionNameNode.text}");\n`;
+
+    } else {
+
+        traceEnterStatement =
+            `\n    traceEnter("${functionNameNode.text}", ${parameterNames.join(", ")});\n`;
+
+    }
+
+    // -----------------------------
+    // Insert traceEnter()
+    // -----------------------------
     modifiedCode =
-`#include "trace.hpp"
+        modifiedCode.slice(0, body.startIndex + 1) +
+        traceEnterStatement +
+        modifiedCode.slice(body.startIndex + 1);
 
-${modifiedCode}`;
-
+    modifiedCode=
+    `#include "trace.hpp"
+    ${modifiedCode}`;
     // -----------------------------
     // Return Result
     // -----------------------------
@@ -178,5 +196,4 @@ ${modifiedCode}`;
     };
 
 }
-
 module.exports = instrument;
