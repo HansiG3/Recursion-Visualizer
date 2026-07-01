@@ -204,4 +204,3 @@ This project is licensed under the MIT License.
 **Hansi Gupta**
 
 - GitHub: https://github.com/HansiG3
-- LinkedIn: *(Add your LinkedIn profile here)*
