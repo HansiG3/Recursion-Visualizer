@@ -9,11 +9,13 @@ function parseTrace(output){
         if(tokens[0]==="CALL"){
             const id=Number(tokens[1]);
             const parent=Number(tokens[2]);
-            const args=tokens.slice(3).map(Number);
+            const functionName=tokens[3];
+            const args=tokens.slice(4).map(Number);
             events.push({
                 type:"CALL",
                 id,
                 parent,
+                functionName: functionName,
                 args
             });
         }

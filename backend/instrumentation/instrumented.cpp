@@ -1,21 +1,20 @@
 #include "trace.hpp"
-    
-#include <iostream>
+    #include <iostream>
 using namespace std;
 
-int fact(int n)
+int fib(int n)
 {
-    traceEnter("fact", n);
+    traceEnter("fib", n);
 
-    if(n==1)
+    if (n <= 1)
         {
-        auto __trace_result=1;
+        auto __trace_result=n;
         traceReturn(__trace_result);
         return __trace_result;
     }
 
     {
-        auto __trace_result=n*fact(n-1);
+        auto __trace_result=fib(n - 1) + fib(n - 2);
         traceReturn(__trace_result);
         return __trace_result;
     }
@@ -23,5 +22,6 @@ int fact(int n)
 
 int main()
 {
-    cout << fact(5);
+    cout << fib(5);
+    return 0;
 }

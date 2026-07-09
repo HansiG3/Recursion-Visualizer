@@ -6,6 +6,7 @@ function buildTree(events){
             nodes[event.id]={
                 id:event.id,
                 parent:event.parent,
+                functionName: event.functionName,
                 args:event.args,
                 returnValue:null,
                 children:[]

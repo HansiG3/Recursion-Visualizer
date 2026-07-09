@@ -1,9 +1,14 @@
 import { useState } from "react";
+
 import { visualizeRecursion } from "./services/api";
+import TreeCanvas from "./components/TreeCanvas";
+
+import "./App.css";
 
 function App() {
 
     const [code, setCode] = useState("");
+    const [tree, setTree] = useState(null);
 
     async function handleVisualize() {
 
@@ -12,6 +17,8 @@ function App() {
             const result = await visualizeRecursion(code);
 
             console.log(result);
+            console.log(result.tree)
+            setTree(result.tree);
 
         }
 
@@ -27,7 +34,7 @@ function App() {
 
         <div
             style={{
-                padding: "40px",
+                padding: "30px",
                 fontFamily: "Arial"
             }}
         >
@@ -35,20 +42,27 @@ function App() {
             <h1>Recursion Visualizer</h1>
 
             <textarea
-                rows={18}
+                rows={15}
                 cols={80}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="Paste recursive C++ code here..."
+                placeholder="Write recursive C++ code here..."
             />
 
-            <br /><br />
+            <br />
+            <br />
 
             <button
                 onClick={handleVisualize}
+                style={{
+                    padding: "10px 20px",
+                    cursor: "pointer"
+                }}
             >
                 Visualize
             </button>
+
+            <TreeCanvas tree={tree} />
 
         </div>
 

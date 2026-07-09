@@ -8,8 +8,8 @@ using namespace std;
 
 static int idCounter = 0;
 static stack<int> activeCalls;
-
-void traceEnter(const string& functionName, int value)
+template<typename... Args>
+void traceEnter(const string& functionName, Args... args)
 {
     int currentId = ++idCounter;
 
@@ -23,7 +23,9 @@ void traceEnter(const string& functionName, int value)
     cout << "CALL "
          << currentId << " "
          << parentId << " "
-         << value << endl;
+         << functionName;
+    ((cout<< " "<<args),...);
+    cout<<endl;
 
     activeCalls.push(currentId);
 }
